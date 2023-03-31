@@ -17,6 +17,39 @@
         <input type="submit" id="submit" value="Submit">
       </form>
     </div>
+    <div>
+      <form>
+	First Number: <br>
+	<input type="number" id="first_number" placeholder="Enter a number"><br><br>
+	Second Number: <br>
+	<input type="number" id="second_number" placeholder="Enter a number"><br><br>
+	<select id="operation">
+	  <option selected>Select an Operation</option>
+	  <option value="add">Add</option>
+	  <option value="subtract">Subtract</option>
+	  <option value="multiply">Multiply</option>
+	  <option value="divide">Divide</option>
+	</select>
+	<input type="number" id="result" placeholder="Result">
+      </form>
+    </div>
     <script src="./form_val.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      let fnumber = document.getElementById("first_number");
+      let snumber = document.getElementById("second_number");
+      let operation = document.getElementById("operation");
+      let result = document.getElementById("result");
+      operation.onchange = ()=> {
+        console.log("onchange");	
+	if(operation.value=="add") 
+	  result.value = parseInt(fnumber.value)+parseInt(snumber.value);
+	if(operation.value=="subtract")
+	  result.value = parseInt(fnumber.value)-parseInt(snumber.value);
+	if(operation.value=="multiply") 
+	  result.value = parseInt(fnumber.value)*parseInt(snumber.value);
+	if(operation.value=="divide")
+	  result.value = parseInt(fnumber.value)/parseInt(snumber.value);
+      }
+    </script>
   </body>
 </html>
