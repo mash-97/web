@@ -39,7 +39,7 @@
       let snumber = document.getElementById("second_number");
       let operation = document.getElementById("operation");
       let result = document.getElementById("result");
-      operation.onchange = ()=> {
+      operation.onselectionchange = ()=> {
         console.log("onchange");	
 	if(operation.value=="add") 
 	  result.value = parseInt(fnumber.value)+parseInt(snumber.value);
