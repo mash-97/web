@@ -4,13 +4,123 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Mashiur Rahman">
+  <meta name="student ID" content="181-15-955">
+  <meta name="email" content="mashiur15-955@diu.edu.bd">
   <title>Driver License</title>
   <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
   <header>
+    <h1 id="hp1">DRIVER'S LICENSE</h1>
+    <h1 id="hp2">APPLICATION</h1>
   </header>
   <main>
+    <section class="first-section">
+      <div>
+        <label for="branch">Branch: </label>
+        <input type="text" name="branch" id="branch">
+      </div>
+      <div>
+        <label for="date">Date: </label>
+        <input type="text" name="date" id="date">
+      </div>
+
+    </section>
+    <section class="second-section">
+      <h4>Applying For A <span style="float: inline-end; font-size: 24px;">(Check any that apply)</span></h4>
+      <div>
+        <div>
+          <label>Learner Permit</label>
+          <input type="checkbox" name="learner_permit" id="learner_permit">
+        </div>
+        <div>
+          <label>Renewal</label>
+          <input type="checkbox" name="renewal" id="renewal">
+        </div>
+        <div>
+          <label>ID Card</label>
+          <input type="checkbox" name="id_card" id="id_card">
+        </div>
+        <div>
+          <label>Replacement</label>
+          <input type="checkbox" name="replacement" id="replacement">
+        </div>
+      </div>
+    </section>
+    <section>
+      <h4>Your Personal</h4>
+      <div>
+        <label>Full Last Name</label>
+        <input type="text" name="full_last_name" id="full_last_name">
+      </div>
+      <div>
+        <label>Full First Name</label>
+        <input type="text" name="full_first_name" id="full_first_name">
+      </div>
+      <div>
+        <label>Date of birth</label>
+        <input type="text" name="dob_day" id="dob_day">
+        <input type="text" name="dob_month" id="dob_month">
+        <input type="text" name="dob_year" id="dob_year">
+      </div>
+      <div>
+        <label>Nationality</label>
+        <input type="text" name="nationality" id="nationality">
+      </div>
+      <div>
+        <label>Address where you live</label>
+        <input type="text" name="address_where_you_live" id="address_where_you_live">
+      </div>
+    </section>
+
+    <section>
+      <h4>ID card number and Details</h4>
+      <div>
+        <label>enter the identification number it appears on the card</label>
+        <input type="text" name="id_number" id="id_number">
+      </div>
+    </section>
+    <section>
+      <h4>Identification information</h4>
+      <div class="con">
+        <label>Driver license? </label>
+        <div>
+          <input type="checkbox" name="dl_yes" id="dl_yes">
+          <label>yes</label>
+        </div>
+        <div>
+          <input type="checkbox" name="dl_no" id="dl_no">
+          <label>no</label>
+        </div>
+      </div>
+      <div class="con">
+        <label>Leamer permit? </label>
+        <div>
+          <input type="checkbox" name="lp_yes" id="lp_yes">
+          <label>yes</label>
+        </div>
+        <div>
+          <input type="checkbox" name="lp_no" id="lp_no">
+          <label>no</label>
+        </div>
+      </div>
+      <div class="con">
+        <label>Non-driver ID card? </label>
+        <div>
+          <input type="checkbox" name="ndic_yes" id="ndic_yes">
+          <label>yes</label>
+        </div>
+        <div>
+          <input type="checkbox" name="ndic_no" id="ndic_no">
+          <label>no</label>
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" id="email">
+        </div>
+      </div>
+    </section>
   </main>
   <footer>
   </footer>
