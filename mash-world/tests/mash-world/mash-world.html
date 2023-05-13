@@ -17,17 +17,29 @@
     <h1 style="text-align: center;">Mash World</h1>
   </header>
   <main class="container">
+
     <section id="board">
       <div class="circle" id="c1"></div>
       <div class="circle" id="c2"></div>
       <div class="circle" id="c3"></div>
     </section>
+
+    
     <section id="configs">
       <h3 style="text-align: center;">Set Configs</h3>
       <div class="config-input">
-        <label>Random Object Creation Threshold</label>
-        <input type="number" min="0.3" max="0.9" step="0.1">
+        <label>Object Creation Threshold: </label>
+        <input type="number" min="0.3" max="0.9" step="0.1" value="0.5">
       </div>
+      <div class="config-input">
+        <label>Minimum for Speed Range (pixels): </label>
+        <input type="number" min="5" max="10" step="1" value="7">
+      </div>
+      <div class="config-input">
+        <label>Maximum for Speed Range (pixels): </label>
+        <input type="number" min="11" max="20" step="1" value="7">
+      </div>
+      <button type="submit" id="submit_config">Start</button>
     </section>
   </main>
   <footer>

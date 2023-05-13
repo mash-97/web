@@ -1,28 +1,29 @@
-:root{
-  --board-size-x: 700px;
-  --board-size-y: 700px;
-}
 
 main{
   padding-top: 10vh;
 
   display: grid;
-  grid-template-columns: [board] var(--board-size-x) [config] auto;
-  grid-template-rows: var(--board-size-y);
+  grid-template-columns: [board] auto [config] auto;
   justify-content: center;
   align-content: center;
-  column-gap: 10px;
+  column-gap: 20px;
 }
 
 #board{
+  position: relative;
   background-color: aqua;
   border: 2px solid black;
+  padding: 0px;
 }
 
 #configs{
   background-color: antiquewhite;
   border: 2px solid black;
   padding: 20px;
+  
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
 }
 
 .circle{
@@ -33,6 +34,9 @@ main{
   display: inline-block;
   border: 1px solid rgb(41, 41, 41);
   box-sizing: border-box;
+  position: absolute;
+  margin: 0;
+  padding: 0;
 }
 
 #c1{
@@ -52,4 +56,19 @@ main{
   position: relative;
   top: 10px;
   left: 60px;
+}
+
+#submit_config{
+  width: 70px;
+  height: 25px;
+  background-color: rgb(88, 184, 114);
+
+  align-self: center;
+}
+
+#submit_config:hover{
+  background-color: rgb(18, 114, 43);
+}
+#submit_config:active{
+  color:aliceblue;
 }
