@@ -98,45 +98,126 @@ class MashWorld {
     this.objects = [];
   }
 
-  spawnNewObject(smin, smax) {
+  createNewObject(x, y, r, vx, vy) {
+    let xobj = new Xobject(
+      x,
+      y,
+      r,
+      vx,
+      vy,
+      this.COLORS[getRndInteger(0, 2)],
+      `xo_${this.objects.length}`,
+      10,
+      document.getElementById("board")
+    );
+    this.objects.push(xobj);
+    return xobj;
+  }
+
+  spawnNewObject(smin, smax, r=this.DEFAULT_RADIUS_COMPS) {
     let rv = Math.random();
-    console.log(`rv: ${rv}`);
     if (rv >= this.R) {
-      let xobj = new Xobject(
-        getRndInteger(0, this.N),
-        getRndInteger(0, this.M),
-        this.DEFAULT_RADIUS_COMPS,
+      let xobj = this.createNewObject(
+        getRndInteger(0, this.N-r),
+        getRndInteger(0, this.M-r),
+        r,
         getRndInteger(smin, smax),
         getRndInteger(smin, smax),
-        this.COLORS[getRndInteger(0, 2)],
-        `xo_${this.objects.length}`,
-        10,
-        document.getElementById("board")
       );
       this.objects.push(xobj);
       return xobj;
     }
     return false;
   }
+
+  run(){
+    this.objects.forEach((e)=>{
+      console.log(`==> for element: ${e.id}`);
+      let cx = parseInt(e.element.style.left);
+      let cy = parseInt(e.element.style.top);
+
+      let fp = calculateFinalPositionAndDirectionInSquareBoundary(cx, cy, e.vx, e.vy, this.N-e.r);
+      
+      
+      e.element.style.left = fp[0]+"px";
+      e.element.style.top = fp[1]+"px";
+      e.vx = fp[2];
+      e.vy = fp[3];
+      console.log(`fp: `, fp);
+    });
+  }
 }
 
+// Calculate the final position of an object inside 
+// a BOUNDARY * BOUNDARY square bundary.
+// Arguments: Current position (x,y) and initial step vectors (VX, VY)
+// Returns: final position (x,y) and finalized vectors (VX, VY)
+function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUNDARY, cvx=VX, cvy=VY) {
+  console.log(`x: ${x}, y: ${y}, cvx: ${cvx}, cvy: ${cvy}`);
+  // recursive base condition
+  if(cvx==0 && cvy==0)
+    return [x, y, VX, VY];
+  
+  // if it crosses the right boundary
+  if(x+cvx >= BOUNDARY) {
+    let remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
+    x = BOUNDARY;
+    let passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    y = y + passed_vy;
+    let remaining_vy = cvy-passed_vy;
 
+    return calculateFinalPositionAndDirectionInSquareBoundary(
+      x,
+      y,
+      VX*(-1),  // as it hits the right most boundary
+      VY,
+      BOUNDARY,
+      remaining_vx*(-1),
+      remaining_vy
+    );
+  }
+  // if it crosses the top boundary
+  if(x+cvx >= BOUNDARY) {
+    let remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
+    x = BOUNDARY;
+    let passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    y = y + passed_vy;
+    let remaining_vy = cvy-passed_vy;
+
+    return calculateFinalPositionAndDirectionInSquareBoundary(
+      x,
+      y,
+      VX*(-1),  // as it hits the right most boundary
+      VY,
+      BOUNDARY,
+      remaining_vx*(-1),
+      remaining_vy
+    );
+  }
+
+
+
+  return [x+cvx, y+cvy, VX, VY];
+}
 let mw = new MashWorld(700, 700, 0.5);
-mw.spawnNewObject(-10, 10); 
-for(let x=1; x<=100; x++)
-  mw.spawnNewObject(-10, 10);
+mw.createNewObject(640, 600, 20, 5, 0)
 
-function run(){
-  mw.objects.forEach((e)=>{
-    e.element.style.top = (parseInt(e.element.style.top)+e.vy)+"px";
-    e.element.style.left = (parseInt(e.element.style.left)+e.vx)+"px";
-    
-  });
-}
 let XXX;
 function rs(){
-  XXX = setInterval(run, 500);
+  XXX = setInterval(()=> mw.run(), 500);
 }
 function rst(){
   clearInterval(XXX);
 }
+
+document.getElementById('start_button').onclick = (e)=>{
+  console.log('e: ', e);
+  if(e.target.innerText=='Start'){
+    e.target.innerText = 'Stop';
+    rs();
+  }
+  else {
+    e.target.innerText = 'Start';
+    rst();
+  }
+};

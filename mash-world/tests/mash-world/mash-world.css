@@ -47,7 +47,7 @@ main{
   height: 60px;
   background-color: blueviolet;
 }
-#c2{
+/* #c2{
   position: relative;
   top: 13px;
   left: 50px;
@@ -56,7 +56,7 @@ main{
   position: relative;
   top: 10px;
   left: 60px;
-}
+} */
 
 #submit_config{
   width: 70px;
@@ -66,9 +66,9 @@ main{
   align-self: center;
 }
 
-#submit_config:hover{
+#start_button:hover{
   background-color: rgb(18, 114, 43);
 }
-#submit_config:active{
+#start_button:active{
   color:aliceblue;
 }
