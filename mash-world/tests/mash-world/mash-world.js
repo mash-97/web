@@ -158,10 +158,50 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   if(cvx==0 && cvy==0)
     return [x, y, VX, VY];
   
+  let remaining_vx, remaining_vy;
+  let passed_vx, passed_vy;
+
   // if it crosses the right boundary
   if(x+cvx >= BOUNDARY) {
-    let remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
+    remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
     x = BOUNDARY;
+    passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    y = y + passed_vy;
+    remaining_vy = cvy-passed_vy;
+
+    return calculateFinalPositionAndDirectionInSquareBoundary(
+      x,
+      y,
+      VX*(-1),  // as it hits the right most boundary
+      VY,
+      BOUNDARY,
+      remaining_vx*(-1),
+      remaining_vy
+    );
+  }
+
+  // if it crosses the bottom boundary
+  if(y+cvy >= BOUNDARY) {
+    remaining_vy = y + cvy - BOUNDARY; // remaining vx vector
+    y = BOUNDARY;
+    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    x = x + passed_vx;
+    remaining_vx = cvx-passed_vx;
+
+    return calculateFinalPositionAndDirectionInSquareBoundary(
+      x,
+      y,
+      VX,  
+      VY*(-1), // as it hits the bottom most boundary
+      BOUNDARY,
+      remaining_vx,
+      remaining_vy*(-1)
+    );
+  }
+  // if it crosses the left boundary (incomplete)
+  if(x+cvx <= 0) {
+    let remaining_vx = x + cvx - 0; // remaining vx vector
+    x = 0;
     let passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
     y = y + passed_vy;
     let remaining_vy = cvy-passed_vy;
@@ -176,35 +216,35 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
       remaining_vy
     );
   }
+
   // if it crosses the top boundary
-  if(x+cvx >= BOUNDARY) {
-    let remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
-    x = BOUNDARY;
-    let passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
-    y = y + passed_vy;
-    let remaining_vy = cvy-passed_vy;
+  if(y+cvy <= 0) {
+    remaining_vy = y + cvy - 0; // remaining vx vector
+    y = 0;
+    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    x = x + passed_vx;
+    remaining_vx = cvx-passed_vx;
 
     return calculateFinalPositionAndDirectionInSquareBoundary(
       x,
       y,
-      VX*(-1),  // as it hits the right most boundary
-      VY,
+      VX,  
+      VY*(-1), // as it hits the top most boundary
       BOUNDARY,
-      remaining_vx*(-1),
-      remaining_vy
+      remaining_vx,
+      remaining_vy*(-1)
     );
   }
-
 
 
   return [x+cvx, y+cvy, VX, VY];
 }
 let mw = new MashWorld(700, 700, 0.5);
-mw.createNewObject(640, 600, 20, 5, 0)
+mw.createNewObject(550, 500, 20, -50, 30);
 
 let XXX;
-function rs(){
-  XXX = setInterval(()=> mw.run(), 500);
+function rs(interval=500){
+  XXX = setInterval(()=> mw.run(), interval);
 }
 function rst(){
   clearInterval(XXX);
