@@ -132,7 +132,7 @@ class MashWorld {
 
   run(){
     this.objects.forEach((e)=>{
-      console.log(`==> for element: ${e.id}`);
+      console.log(`==> for element: `, e.element);
       let cx = parseInt(e.element.style.left);
       let cy = parseInt(e.element.style.top);
 
@@ -162,7 +162,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   let passed_vx, passed_vy;
 
   // if it crosses the right boundary
-  if(x+cvx >= BOUNDARY) {
+  if(x+cvx >= BOUNDARY && cvx!=0) {
     remaining_vx = x + cvx - BOUNDARY; // remaining vx vector
     x = BOUNDARY;
     passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
@@ -181,7 +181,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   }
 
   // if it crosses the bottom boundary
-  if(y+cvy >= BOUNDARY) {
+  if(y+cvy >= BOUNDARY && cvy!=0) {
     remaining_vy = y + cvy - BOUNDARY; // remaining vx vector
     y = BOUNDARY;
     passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
@@ -199,7 +199,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
     );
   }
   // if it crosses the left boundary (incomplete)
-  if(x+cvx <= 0) {
+  if(x+cvx <= 0 && cvx!=0) {
     let remaining_vx = x + cvx - 0; // remaining vx vector
     x = 0;
     let passed_vy = Math.round(parseFloat(((cvx-remaining_vx)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
@@ -218,7 +218,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   }
 
   // if it crosses the top boundary
-  if(y+cvy <= 0) {
+  if(y+cvy <= 0 && cvy!=0) {
     remaining_vy = y + cvy - 0; // remaining vx vector
     y = 0;
     passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
@@ -239,11 +239,18 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
 
   return [x+cvx, y+cvy, VX, VY];
 }
+
+
 let mw = new MashWorld(700, 700, 0.5);
-mw.createNewObject(550, 500, 20, -50, 30);
+mw.createNewObject(550, 500, 20, 50, -30);
+for(let t=0; t<=30; t++)
+  mw.spawnNewObject(
+    getRndInteger(-5, 5),
+    getRndInteger(-5, 5)
+  );
 
 let XXX;
-function rs(interval=500){
+function rs(interval=1000/60){
   XXX = setInterval(()=> mw.run(), interval);
 }
 function rst(){
