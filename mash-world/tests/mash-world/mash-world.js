@@ -184,7 +184,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   if(y+cvy >= BOUNDARY && cvy!=0) {
     remaining_vy = y + cvy - BOUNDARY; // remaining vx vector
     y = BOUNDARY;
-    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)/(VY/VX)).toFixed(2))); // passed vy based on passed vx
     x = x + passed_vx;
     remaining_vx = cvx-passed_vx;
 
@@ -221,7 +221,7 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
   if(y+cvy <= 0 && cvy!=0) {
     remaining_vy = y + cvy - 0; // remaining vx vector
     y = 0;
-    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)*(VY/VX)).toFixed(2))); // passed vy based on passed vx
+    passed_vx = Math.round(parseFloat(((cvy-remaining_vy)/(VY/VX)).toFixed(2))); // passed vy based on passed vx
     x = x + passed_vx;
     remaining_vx = cvx-passed_vx;
 
@@ -242,8 +242,8 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
 
 
 let mw = new MashWorld(700, 700, 0.5);
-mw.createNewObject(550, 500, 20, 50, -30);
-for(let t=0; t<=30; t++)
+// mw.createNewObject(550, 500, 20, 50, -30);
+for(let t=0; t<=1; t++)
   mw.spawnNewObject(
     getRndInteger(-5, 5),
     getRndInteger(-5, 5)
