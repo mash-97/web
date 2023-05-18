@@ -47,30 +47,59 @@ function stop() {
 }
 
 class Xobject {
-  constructor(x, y, r, vx, vy, c, id, lifespan=10, parent_element=null) {
-    console.log(`x: ${x}, y: ${y}, r: ${r}, vx: ${vx}, vy: ${vy}, c: `, c);
-    this.x = x;
-    this.y = y;
-    this.r = r;
+  static NUMBER_OF_OBJECTS = 0;
+  constructor(x, y, r, m, vx, vy, color, lifespan=10, parent_element=null) {
+    this.lifespan = lifespan;
+    this.element = Xobject.createXobject(parent_element || document.getElementsByTagName("body"));
+    this.setRadius(r);
+    this.setColor(color);
+    this.setPosition(x, y);
     this.vx = vx;
     this.vy = vy;
-    this.c = c;
-    this.id = id;
-    this.lifespan = lifespan;
-    this.manifest(parent_element || document.getElementsByTagName("body"));
+    this.m = m;
   }
 
-  manifest(pe){
-    console.log(`pe: `, pe);
-    this.element = document.createElement("div");
-    this.element.id = this.id;
-    this.element.classList.add("circle");
-    this.element.style.backgroundColor = this.c(1);
+  setColor(color, alpha=1) {
+    this.color = color;
+    this.element.style.backgroundColor = color(alpha);
+  }
+  setRadius(radius) {
+    this.r = radius;
     this.element.style.width = this.r+"px";
     this.element.style.height = this.r+"px";
+  }
+  setPosition(x, y) {
+    this.x = x;
+    this.y = y;
     this.element.style.left = this.x+"px";
     this.element.style.top = this.y+"px";
-    pe.appendChild(this.element);
+  }
+  setStepVector(vx, vy) {
+    this.vx = vx;
+    this.vy = vy;
+  }
+
+  devour(xobj) {
+    return xobj;
+  }
+
+  touches(xobj) {
+    let x1 = this.x, x1r = this.x+this.r, y1 = this.y, y1r = this.y+this.r;
+    let x2 = xobj.x, x2r = xobj.x+xobj.r, y2 = xobj.y, y2r = xobj.y+xobj.r;
+
+    return ((x2>=x1 && x2<=x1r) || (x2r>=x1 && x2r<=x1r)) && ((y2>=y1 && y2<=y1r) || (y2r<=y1 && y2r<=y1r)) ? true: false;
+  }
+
+  static reproduce(xobj_1, xobj_2) {
+    return [xobj_1, xobj_2];
+  }
+  static createXobject(parent_element){
+    let element = document.createElement("div");
+    Xobject.NUMBER_OF_OBJECTS += 1;
+    element.id = `xo_${Xobject.NUMBER_OF_OBJECTS}`;
+    element.classList.add("circle");
+    parent_element.appendChild(element);
+    return element;
   }
 }
 
@@ -78,7 +107,7 @@ class MashWorld {
   N = 700;
   M = 700;
   R = 5.00; // threshold a new object produces
-  DEFAULT_RADIUS_COMPS = 10;
+  DEFAULT_RADIUS_COMPS = 30;
   COLORS = [
     (a) => {
       return `rgba(100, 0, 0, ${a})`;
@@ -103,10 +132,10 @@ class MashWorld {
       x,
       y,
       r,
+      1,
       vx,
       vy,
       this.COLORS[getRndInteger(0, 2)],
-      `xo_${this.objects.length}`,
       10,
       document.getElementById("board")
     );
@@ -124,7 +153,6 @@ class MashWorld {
         getRndInteger(smin, smax),
         getRndInteger(smin, smax),
       );
-      this.objects.push(xobj);
       return xobj;
     }
     return false;
@@ -132,7 +160,6 @@ class MashWorld {
 
   run(){
     this.objects.forEach((e)=>{
-      console.log(`==> for element: `, e.element);
       let cx = parseInt(e.element.style.left);
       let cy = parseInt(e.element.style.top);
 
@@ -143,8 +170,15 @@ class MashWorld {
       e.element.style.top = fp[1]+"px";
       e.vx = fp[2];
       e.vy = fp[3];
-      console.log(`fp: `, fp);
     });
+    for(let i=0; i<this.objects.length; i++){
+      for(let j=i+1; j<this.objects.length; j++){
+        let temp = this.objects[i].touches(this.objects[j]);
+        if(temp)
+          console.log(`${this.objects[i].element.id} <=> ${this.objects[j].element.id}: ${temp}`);
+      }
+    }
+
   }
 }
 
@@ -153,7 +187,6 @@ class MashWorld {
 // Arguments: Current position (x,y) and initial step vectors (VX, VY)
 // Returns: final position (x,y) and finalized vectors (VX, VY)
 function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUNDARY, cvx=VX, cvy=VY) {
-  console.log(`x: ${x}, y: ${y}, cvx: ${cvx}, cvy: ${cvy}`);
   // recursive base condition
   if(cvx==0 && cvy==0)
     return [x, y, VX, VY];
@@ -243,14 +276,14 @@ function  calculateFinalPositionAndDirectionInSquareBoundary(x, y, VX, VY, BOUND
 
 let mw = new MashWorld(700, 700, 0.5);
 // mw.createNewObject(550, 500, 20, 50, -30);
-for(let t=0; t<=1; t++)
+for(let t=0; t<=10; t++)
   mw.spawnNewObject(
-    getRndInteger(-5, 5),
-    getRndInteger(-5, 5)
+    getRndInteger(-25, 25),
+    getRndInteger(-25, 25)
   );
 
 let XXX;
-function rs(interval=1000/60){
+function rs(interval=1000){
   XXX = setInterval(()=> mw.run(), interval);
 }
 function rst(){
