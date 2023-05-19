@@ -18,10 +18,27 @@
   </header>
   <main class="container">
 
+    <section id="details">
+      <h3 style="text-align: center;">Rules</h3>
+      <ul>
+        <li>A new object is created if a random value crosses the Object Creation Threshold.
+          The newly created object gets a random velocity/step vector (vx, vy) between the Minimum Speed
+          and Maximum Speed, a random size between Minimum Size and Maximum Size, and a random color from (red, green, blue).
+        </li>
+        
+        <li>Only an object with different color and comparably big size assimilates other object with different color and comparably small size.
+          (e.g. a Red colored object with 10*10 sizes will devour a Blue colored object with 9*9 sizes).
+        </li>
+
+        <li>Two same colored objects doesn't do anything if their sizes ratio difference doesn't crosses the Smashing Threshold. If otherwise the bigger object will be 
+          broken down into several pieces of objects with the size of the smaller object between them, resulting the different pieces moving into different directions.
+        </li>
+        <li>Every object gets an initial Default Lifespan. An object gains the lifespan of others as according to the assimiliation rules.</li>
+      </ul>
+    </section>
+
     <section id="board">
-      <!-- <div class="circle" id="c1"></div>
-      <div class="circle" id="c2"></div>
-      <div class="circle" id="c3"></div> -->
+
     </section>
 
     
@@ -29,15 +46,31 @@
       <h3 style="text-align: center;">Set Configs</h3>
       <div class="config-input">
         <label>Object Creation Threshold: </label>
-        <input type="number" min="0.3" max="0.9" step="0.1" value="0.5">
+        <input type="number" min="0.1" max="0.9" step="0.1" value="0.5" id='object_creation_threshold'>
+      </div>
+      <div class="config-input">
+        <label>Default Lifespan: </label>
+        <input type="number" min="20" max="70" step="1" value="20" id="default_lifespan">
+      </div>
+      <div class="config-input">
+        <label>Smashing Threshold: </label>
+        <input type="number" step="1" value="5" id="smashing_threshold">
+      </div>
+      <div class="config-input">
+        <label>Minimum for Size Range (pixels): </label>
+        <input type="number" min="5" max="10" step="1" value="7" id="minimum_size_range">
+      </div>
+      <div class="config-input">
+        <label>Maximum for Size Range (pixels): </label>
+        <input type="number" min="11" max="20" step="1" value="13" id="maximum_size_range">
       </div>
       <div class="config-input">
         <label>Minimum for Speed Range (pixels): </label>
-        <input type="number" min="5" max="10" step="1" value="7">
+        <input type="number" min="5" max="10" step="1" value="7" id="minimum_speed_range">
       </div>
       <div class="config-input">
         <label>Maximum for Speed Range (pixels): </label>
-        <input type="number" min="11" max="20" step="1" value="7">
+        <input type="number" min="11" max="20" step="1" value="13" id="maximum_speed_range">
       </div>
       <button type="submit" id="start_button">Start</button>
     </section>

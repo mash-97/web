@@ -3,12 +3,15 @@ main{
   padding-top: 10vh;
 
   display: grid;
-  grid-template-columns: [board] auto [config] auto;
+  grid-template-columns: [details] auto [board] auto [config] auto;
   justify-content: center;
   align-content: center;
   column-gap: 20px;
 }
 
+#details{
+  width: 500px;
+}
 #board{
   position: relative;
   background-color: aqua;
@@ -26,6 +29,7 @@ main{
   row-gap: 20px;
 }
 
+
 .circle{
   border-radius: 50%;
   width: 10px;
@@ -39,28 +43,9 @@ main{
   padding: 0;
 }
 
-#c1{
-  position: relative;
-  top: 10px;
-  left: 50px;
-  width: 60px;
-  height: 60px;
-  background-color: blueviolet;
-}
-/* #c2{
-  position: relative;
-  top: 13px;
-  left: 50px;
-}
-#c3{
-  position: relative;
-  top: 10px;
-  left: 60px;
-} */
-
-#submit_config{
-  width: 70px;
-  height: 25px;
+#start_button{
+  width: 100px;
+  height: 35px;
   background-color: rgb(88, 184, 114);
 
   align-self: center;
@@ -71,4 +56,8 @@ main{
 }
 #start_button:active{
   color:aliceblue;
+}
+
+li{
+  margin-bottom: 30px;
 }
