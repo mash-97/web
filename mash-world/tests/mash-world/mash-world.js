@@ -102,14 +102,14 @@ let BOARD = document.getElementById("board");
 BOARD.style.width = N+"px";
 BOARD.style.height = M+"px";
 
-class Xobject {
+class Bubble {
   static PARENT_ELEMENT = document.getElementById('board');
   static NUMBER_OF_OBJECTS = 0;
   constructor(x, y, r, vx, vy, color, lifespan=10) {
     this.r = r;
     this.color = color;
     this.lifespan = lifespan;
-    this.element = Xobject.createXobject(Xobject.PARENT_ELEMENT);
+    this.element = Bubble.createBubble(Bubble.PARENT_ELEMENT);
     this.setRadius();
     this.setColor();
     this.setPosition(x, y);
@@ -157,31 +157,43 @@ class Xobject {
   }
 
   destroy() {
-    console.log("destroy: ", this.element);
-    Xobject.PARENT_ELEMENT.removeChild(this.element);
+    // console.log("destroy: ", this.element);
+
+    if(Bubble.PARENT_ELEMENT.contains(this.element))
+      Bubble.PARENT_ELEMENT.removeChild(this.element);
+    else
+      console.log('mismatched destroy call for: ', this.element);
   }
 
   static reproduce(xobj_1, xobj_2) {
     return [xobj_1, xobj_2];
   }
 
-  static createXobject(parent_element){
+  static createBubble(parent_element){
     let element = document.createElement("div");
-    Xobject.NUMBER_OF_OBJECTS += 1;
-    element.id = `xo_${Xobject.NUMBER_OF_OBJECTS}`;
+    Bubble.NUMBER_OF_OBJECTS += 1;
+    element.id = `xo_${Bubble.NUMBER_OF_OBJECTS}`;
     element.classList.add("circle");
     parent_element.appendChild(element);
     return element;
   }
 }
 
-class MashWorld {
+class BubbleWorld {
   static N = 700;
   static M = 700;
   static R = 5.00; // threshold a new object produces
-  DEFAULT_RADIUS_COMPS = 30;
+  static TOC = document.getElementById('toc');
+  static TOD = document.getElementById('tod');
+  static NCO = document.getElementById('nco');
+  static NCO_TOC = document.getElementById('nco_toc');
+  static TOD_TOC = document.getElementById('tod_toc');
+  static MAA = document.getElementById('maa');
+  static MSA = document.getElementById('msa');
+
   static MAX_OBJECTS = 30;
-  COLORS = [
+
+  static COLORS = [
     (a) => {
       return `rgba(100, 0, 0, ${a})`;
     },
@@ -192,7 +204,8 @@ class MashWorld {
       return `rgba(0, 0, 100, ${a})`;
     }
   ];
-
+  TOTAL_OBJECTS_CREATED = 0;
+  TOTAL_OBJECTS_DESTROYED = 0;
   constructor(
     object_creation_threshold, 
     default_lifespan, 
@@ -202,9 +215,9 @@ class MashWorld {
     minimum_speed_range,
     maximum_speed_range
   ) {
-    this.N = MashWorld.N;
-    this.M = MashWorld.M;
-    this.R = MashWorld.R;
+    this.N = BubbleWorld.N;
+    this.M = BubbleWorld.M;
+    this.R = BubbleWorld.R;
     this.object_creation_threshold = object_creation_threshold;
     this.default_lifespan = default_lifespan;
     this.smashing_threshold = smashing_threshold;
@@ -213,6 +226,8 @@ class MashWorld {
     this.minimum_speed_range = minimum_speed_range;
     this.maximum_speed_range = maximum_speed_range;
     this.objects = [];
+    this.maximum_age_attained = 0;
+    this.maximum_size_attained = 0;
 
     console.log([object_creation_threshold, 
       default_lifespan, 
@@ -222,31 +237,35 @@ class MashWorld {
       minimum_speed_range,
       maximum_speed_range]);
   }
-  smash(bxo, sxo) {
-    let number_of_objects = parseInt(bxo.r / sxo.r);
+  smash(maxo, mino) {
+    let number_of_objects = Math.round(parseInt(maxo.r / mino.r));
     for(let t=0; t<number_of_objects; t++) {
       this.createNewObject(
-        bxo.x,
-        bxo.y,
-        sxo.r,
-        [bxo.vx, -bxo.vx][getRndInteger(0, 1)],
-        [bxo.vy, -bxo.vy][getRndInteger(0, 1)],
-        bxo.color,
-        bxo.lifespan+sxo.lifespan
+        maxo.x,
+        maxo.y,
+        mino.r,
+        [maxo.vx, -maxo.vx, maxo.vy, -maxo.vy][getRndInteger(0, 3)],
+        [maxo.vx, -maxo.vx, maxo.vy, -maxo.vy][getRndInteger(0, 3)],
+        maxo.color,
+        (maxo.lifespan-maxo.passed_lifetime)+(mino.lifespan-mino.passed_lifetime)
       );
     }
   }
-  createNewObject(x, y, r, vx, vy) {
-    let xobj = new Xobject(
+  createNewObject(x, y, r, vx, vy, color=null, lifespan=null) {
+    color = color || BubbleWorld.COLORS[getRndInteger(0, 2)];
+    lifespan = lifespan || this.default_lifespan;
+    let xobj = new Bubble(
       x,
       y,
       r,
       vx,
       vy,
-      this.COLORS[getRndInteger(0, 2)],
-      this.default_lifespan
+      color,
+      lifespan
     );
     this.objects.push(xobj);
+    this.TOTAL_OBJECTS_CREATED += 1;
+    
     return xobj;
   }
 
@@ -257,7 +276,7 @@ class MashWorld {
     while(r==0 || r==null)
       r = getRndInteger(this.minimum_size_range, this.maximum_size_range);
     
-    if (rv >= this.object_creation_threshold && this.objects.length<MashWorld.MAX_OBJECTS) {
+    if (rv >= this.object_creation_threshold) {// && this.objects.length<BubbleWorld.MAX_OBJECTS) {
       let xobj = this.createNewObject(
         getRndInteger(0, this.N-r),
         getRndInteger(0, this.M-r),
@@ -271,28 +290,33 @@ class MashWorld {
   }
 
   run(){
+    // console.log('==> run started');
     let to_be_deleted = [];
     this.spawnNewObject();
     this.objects.forEach((e)=>{
-      let cx = parseInt(e.element.style.left);
-      let cy = parseInt(e.element.style.top);
 
-      let fp = calculateFinalPositionAndDirectionInSquareBoundary(cx, cy, e.vx, e.vy, this.N-e.r);
+      let fp = calculateFinalPositionAndDirectionInSquareBoundary(e.x, e.y, e.vx, e.vy, this.N-e.r);
       
       
       e.setPosition(fp[0], fp[1]);
       e.setStepVector(fp[2], fp[3]);
       e.passed_lifetime += 1;
       e.setColor();
-      if(e.passed_lifetime>=e.lifespan)
+      if(e.passed_lifetime>=e.lifespan){
         to_be_deleted.push(e);
+      }
+
+      if(e.r > this.maximum_size_attained)
+        this.maximum_size_attained = e.r;
+      if(e.passed_lifetime > this.maximum_age_attained)
+        this.maximum_age_attained = e.passed_lifetime;
     });
     
     for(let i=0; i<this.objects.length; i++){
-      if(to_be_deleted.indexOf(this.objects[i])!=-1)
+      if(to_be_deleted.indexOf(this.objects[i]) != -1) // if the object is in the to_be_deleted list, next
         continue;
       for(let j=i+1; j<this.objects.length; j++){
-        if(to_be_deleted.indexOf(this.objects[j])!=-1)
+        if(to_be_deleted.indexOf(this.objects[j]) != -1) // if the object is in the to_be_deleted list, next
           continue;
         let touches = this.objects[i].touches(this.objects[j]);
         
@@ -309,26 +333,36 @@ class MashWorld {
           maxo = this.objects[j];
           mino = this.objects[i];
         }
-        console.log(this.objects[i].color);
-        console.log(this.objects[i].color != this.objects[j].color);
+
         if(this.objects[i].color != this.objects[j].color) {
           // smash oout
           this.smash(maxo, mino);
           to_be_deleted.push(mino);
           to_be_deleted.push(maxo);
         }
-        else {
+        else if(this.objects[i].color == this.objects[j].color) {
           maxo.devour(mino);
           to_be_deleted.push(mino);
         }
-          
+        break;
       }
     }
 
     for(let t=0; t<to_be_deleted.length; t++) {
       to_be_deleted[t].destroy();
-      this.objects.splice(this.objects.indexOf(to_be_deleted[t]), 1);
+      let indx = this.objects.indexOf(to_be_deleted[t]);
+      if(indx>-1)
+        this.objects.splice(indx, 1);
+      this.TOTAL_OBJECTS_DESTROYED += 1;
     }
+    BubbleWorld.TOD.textContent = this.TOTAL_OBJECTS_DESTROYED;
+    BubbleWorld.NCO.textContent = this.objects.length;
+    BubbleWorld.TOC.textContent = this.TOTAL_OBJECTS_CREATED;
+    BubbleWorld.NCO_TOC.textContent = (this.objects.length / this.TOTAL_OBJECTS_CREATED).toFixed(4);
+    BubbleWorld.TOD_TOC.textContent = (this.TOTAL_OBJECTS_DESTROYED / this.TOTAL_OBJECTS_CREATED).toFixed(4);
+    BubbleWorld.MAA.textContent = this.maximum_age_attained;
+    BubbleWorld.MSA.textContent = this.maximum_size_attained;
+    // console.log('<=== run ended!');
   }
 }
 
@@ -345,7 +379,7 @@ let mw = null;
 
 
 let XXX;
-function rs(interval=1000/5){
+function rs(interval=1000/60){
   XXX = setInterval(()=> mw.run(), interval);
 }
 function rst(){
@@ -353,7 +387,7 @@ function rst(){
 }
 
 document.getElementById('set_config').onclick = (e)=>{
-  mw = new MashWorld(
+  mw = new BubbleWorld(
     parseFloat(object_creation_threshold_element.value),
     parseInt(default_lifespan_element.value),
     parseFloat(smashing_threshold_element.value),
@@ -365,10 +399,11 @@ document.getElementById('set_config').onclick = (e)=>{
   e.target.hidden = true;
   document.getElementById('start_button').hidden = false;
 }
+let STI = document.getElementById('sti');
 document.getElementById('start_button').onclick = (e)=>{
   if(e.target.innerText=='Play'){
     e.target.innerText = 'Pause';
-    rs();
+    rs(parseInt(STI.value));
   }
   else {
     e.target.innerText = 'Play';

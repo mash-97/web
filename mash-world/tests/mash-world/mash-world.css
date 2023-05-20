@@ -14,7 +14,7 @@ main{
 }
 #board{
   position: relative;
-  background-color: aqua;
+  background-color: whitesmoke;
   border: 2px solid black;
   padding: 0px;
 }
@@ -76,3 +76,4 @@ main{
 li{
   margin-bottom: 30px;
 }
+
