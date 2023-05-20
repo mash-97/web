@@ -106,10 +106,11 @@ class Xobject {
   static PARENT_ELEMENT = document.getElementById('board');
   static NUMBER_OF_OBJECTS = 0;
   constructor(x, y, r, vx, vy, color, lifespan=10) {
+    this.r = r;
     this.color = color;
     this.lifespan = lifespan;
     this.element = Xobject.createXobject(Xobject.PARENT_ELEMENT);
-    this.setRadius(r);
+    this.setRadius();
     this.setColor();
     this.setPosition(x, y);
     this.vx = vx;
@@ -122,8 +123,7 @@ class Xobject {
   setColor() {
     this.element.style.backgroundColor = this.color(this.getLifeForce());
   }
-  setRadius(radius) {
-    this.r = radius;
+  setRadius() {
     this.element.style.width = this.r+"px";
     this.element.style.height = this.r+"px";
   }
@@ -139,7 +139,10 @@ class Xobject {
   }
 
   devour(xobj) {
-    return xobj;
+    this.r += xobj.r;
+    this.lifespan += (xobj.lifespan - xobj.passed_lifetime);
+    this.setRadius();
+    this.setStepVector(this.vx + xobj.vx, this.vy + xobj.vy);
   }
 
   touches(xobj) {
@@ -154,6 +157,7 @@ class Xobject {
   }
 
   destroy() {
+    console.log("destroy: ", this.element);
     Xobject.PARENT_ELEMENT.removeChild(this.element);
   }
 
@@ -176,6 +180,7 @@ class MashWorld {
   static M = 700;
   static R = 5.00; // threshold a new object produces
   DEFAULT_RADIUS_COMPS = 30;
+  static MAX_OBJECTS = 30;
   COLORS = [
     (a) => {
       return `rgba(100, 0, 0, ${a})`;
@@ -208,6 +213,14 @@ class MashWorld {
     this.minimum_speed_range = minimum_speed_range;
     this.maximum_speed_range = maximum_speed_range;
     this.objects = [];
+
+    console.log([object_creation_threshold, 
+      default_lifespan, 
+      smashing_threshold, 
+      minimum_size_range, 
+      maximum_size_range,
+      minimum_speed_range,
+      maximum_speed_range]);
   }
   smash(bxo, sxo) {
     let number_of_objects = parseInt(bxo.r / sxo.r);
@@ -231,29 +244,35 @@ class MashWorld {
       vx,
       vy,
       this.COLORS[getRndInteger(0, 2)],
-      10
+      this.default_lifespan
     );
     this.objects.push(xobj);
     return xobj;
   }
 
-  spawnNewObject(smin, smax, r=this.DEFAULT_RADIUS_COMPS) {
+  spawnNewObject() {
     let rv = Math.random();
-    if (rv >= this.R) {
+    let r = null;
+    
+    while(r==0 || r==null)
+      r = getRndInteger(this.minimum_size_range, this.maximum_size_range);
+    
+    if (rv >= this.object_creation_threshold && this.objects.length<MashWorld.MAX_OBJECTS) {
       let xobj = this.createNewObject(
         getRndInteger(0, this.N-r),
         getRndInteger(0, this.M-r),
         r,
-        getRndInteger(smin, smax),
-        getRndInteger(smin, smax),
+        getRndInteger(this.minimum_speed_range, this.maximum_speed_range),
+        getRndInteger(this.minimum_speed_range, this.maximum_speed_range),
       );
       return xobj;
     }
     return false;
   }
 
-  run(oct=0.5, smin=-7, smax=7, r=this.DEFAULT_RADIUS_COMPS){
-    this.spawnNewObject(smin, smax, r);
+  run(){
+    let to_be_deleted = [];
+    this.spawnNewObject();
     this.objects.forEach((e)=>{
       let cx = parseInt(e.element.style.left);
       let cy = parseInt(e.element.style.top);
@@ -261,54 +280,102 @@ class MashWorld {
       let fp = calculateFinalPositionAndDirectionInSquareBoundary(cx, cy, e.vx, e.vy, this.N-e.r);
       
       
-      e.element.style.left = fp[0]+"px";
-      e.element.style.top = fp[1]+"px";
-      e.vx = fp[2];
-      e.vy = fp[3];
+      e.setPosition(fp[0], fp[1]);
+      e.setStepVector(fp[2], fp[3]);
       e.passed_lifetime += 1;
       e.setColor();
       if(e.passed_lifetime>=e.lifespan) {
         this.objects.splice(this.objects.indexOf(e), 1);
         e.destroy();
+        to_be_deleted.push(e);
       }
     });
+    
     for(let i=0; i<this.objects.length; i++){
+      if(to_be_deleted.indexOf(this.objects[i])!=-1)
+        continue;
       for(let j=i+1; j<this.objects.length; j++){
-        let temp = this.objects[i].touches(this.objects[j]);
-        if(temp)
-          console.log(`${this.objects[i].element.id} <=> ${this.objects[j].element.id}: ${temp}`);
-          if(this.objects[])
+        if(to_be_deleted.indexOf(this.objects[j])!=-1)
+          continue;
+        let touches = this.objects[i].touches(this.objects[j]);
+        
+        let dr = this.objects[i].r - this.objects[j].r;
+        if(!touches || Math.abs(dr) < this.smashing_threshold)
+          continue;
+        
+        let maxo, mino;
+        if(this.objects[i].r >= this.objects[j].r){
+          maxo = this.objects[i];
+          mino = this.objects[j];
+        }
+        else {
+          maxo = this.objects[j];
+          mino = this.objects[i];
+        }
+        console.log(this.objects[i].color);
+        console.log(this.objects[i].color != this.objects[j].color);
+        if(this.objects[i].color != this.objects[j].color) {
+          // smash oout
+          this.smash(maxo, mino);
+          to_be_deleted.push(mino);
+          mino.destroy();
+          to_be_deleted.push(maxo);
+          maxo.destroy();
+        }
+        else {
+          maxo.devour(mino);
+          to_be_deleted.push(mino);
+          mino.destroy();
+        }
+          
       }
     }
+
+    for(let t=0; t<to_be_deleted.length; t++)
+      this.objects.splice(this.objects.indexOf(to_be_deleted[t]), 1);
 
   }
 }
 
 
-let mw = new MashWorld(700, 700, 0.5);
-// mw.createNewObject(550, 500, 20, 50, -30);
-for(let t=0; t<=10; t++)
-  mw.spawnNewObject(
-    getRndInteger(-25, 25),
-    getRndInteger(-25, 25)
-  );
+let object_creation_threshold_element = document.getElementById('object_creation_threshold');
+let default_lifespan_element = document.getElementById('default_lifespan');
+let smashing_threshold_element = document.getElementById('smashing_threshold');
+let minimum_size_range_element = document.getElementById('minimum_size_range');
+let maximum_size_range_element = document.getElementById('maximum_size_range');
+let minimum_speed_range_element = document.getElementById('minimum_speed_range');
+let maximum_speed_range_element = document.getElementById('maximum_speed_range');
+
+let mw = null;
+
 
 let XXX;
-function rs(interval=1000){
+function rs(interval=1000/5){
   XXX = setInterval(()=> mw.run(), interval);
 }
 function rst(){
   clearInterval(XXX);
 }
 
+document.getElementById('set_config').onclick = (e)=>{
+  mw = new MashWorld(
+    parseFloat(object_creation_threshold_element.value),
+    parseInt(default_lifespan_element.value),
+    parseFloat(smashing_threshold_element.value),
+    parseInt(minimum_size_range_element.value),
+    parseInt(maximum_size_range_element.value),
+    parseInt(minimum_speed_range_element.value),
+    parseInt(maximum_speed_range_element.value)
+  );
+  e.target.hidden = true;
+}
 document.getElementById('start_button').onclick = (e)=>{
-  console.log('e: ', e);
-  if(e.target.innerText=='Start'){
-    e.target.innerText = 'Stop';
+  if(e.target.innerText=='Play'){
+    e.target.innerText = 'Pause';
     rs();
   }
   else {
-    e.target.innerText = 'Start';
+    e.target.innerText = 'Play';
     rst();
   }
 };

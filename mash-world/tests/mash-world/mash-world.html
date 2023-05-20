@@ -53,26 +53,28 @@
         <input type="number" min="20" max="70" step="1" value="20" id="default_lifespan">
       </div>
       <div class="config-input">
-        <label>Smashing Threshold: </label>
-        <input type="number" step="1" value="5" id="smashing_threshold">
+        <label>Interaction Threshold: </label>
+        <input type="number" step="1" value="2" id="smashing_threshold">
       </div>
       <div class="config-input">
         <label>Minimum for Size Range (pixels): </label>
-        <input type="number" min="5" max="10" step="1" value="7" id="minimum_size_range">
+        <input type="number" min="5" max="10" step="1" value="10" id="minimum_size_range">
       </div>
       <div class="config-input">
         <label>Maximum for Size Range (pixels): </label>
-        <input type="number" min="11" max="20" step="1" value="13" id="maximum_size_range">
+        <input type="number" min="11" max="40" step="1" value="20" id="maximum_size_range">
       </div>
       <div class="config-input">
         <label>Minimum for Speed Range (pixels): </label>
-        <input type="number" min="5" max="10" step="1" value="7" id="minimum_speed_range">
+        <input type="number" min="-30" max="15" step="1" value="-10" id="minimum_speed_range">
       </div>
       <div class="config-input">
         <label>Maximum for Speed Range (pixels): </label>
-        <input type="number" min="11" max="20" step="1" value="13" id="maximum_speed_range">
+        <input type="number" min="1" max="45" step="1" value="13" id="maximum_speed_range">
       </div>
-      <button type="submit" id="start_button">Start</button>
+      <button type="submit" id="set_config">Set Config</button>
+      <button type="submit" id="start_button">Play</button>
+      
     </section>
   </main>
   <footer>
