@@ -284,11 +284,8 @@ class MashWorld {
       e.setStepVector(fp[2], fp[3]);
       e.passed_lifetime += 1;
       e.setColor();
-      if(e.passed_lifetime>=e.lifespan) {
-        this.objects.splice(this.objects.indexOf(e), 1);
-        e.destroy();
+      if(e.passed_lifetime>=e.lifespan)
         to_be_deleted.push(e);
-      }
     });
     
     for(let i=0; i<this.objects.length; i++){
@@ -318,22 +315,20 @@ class MashWorld {
           // smash oout
           this.smash(maxo, mino);
           to_be_deleted.push(mino);
-          mino.destroy();
           to_be_deleted.push(maxo);
-          maxo.destroy();
         }
         else {
           maxo.devour(mino);
           to_be_deleted.push(mino);
-          mino.destroy();
         }
           
       }
     }
 
-    for(let t=0; t<to_be_deleted.length; t++)
+    for(let t=0; t<to_be_deleted.length; t++) {
+      to_be_deleted[t].destroy();
       this.objects.splice(this.objects.indexOf(to_be_deleted[t]), 1);
-
+    }
   }
 }
 
@@ -368,6 +363,7 @@ document.getElementById('set_config').onclick = (e)=>{
     parseInt(maximum_speed_range_element.value)
   );
   e.target.hidden = true;
+  document.getElementById('start_button').hidden = false;
 }
 document.getElementById('start_button').onclick = (e)=>{
   if(e.target.innerText=='Play'){
